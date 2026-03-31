@@ -1,4 +1,4 @@
 flask
 gunicorn
 sqlalchemy
-psycopg2-binarygit
+psycopg2-binary
