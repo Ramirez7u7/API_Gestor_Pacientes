@@ -7,6 +7,11 @@ app = Flask(__name__)
 
 
 
+@app.route('/')
+def home():
+    return "API funcionando viva cristo rey"
+
+
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
@@ -23,11 +28,10 @@ class User(Base):
     name = Column(String)
     status = Column(String)
     telefono = Column(String)
-
-
-
-
 Base.metadata.create_all(engine)
+
+
+
 @app.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
@@ -39,6 +43,7 @@ def create_user():
     session.add(new_user)
     session.commit()
     return jsonify({"mensaje": "Usuario creado con exito jupi"}), 201
+
 
 
 
@@ -65,7 +70,5 @@ def delete_user(user_id):
     session.delete(user)
     session.commit()
     return jsonify({"mensaje": "Usuario erradicado "}), 200
-
-
 if __name__ == "__main__":
     app.run()
