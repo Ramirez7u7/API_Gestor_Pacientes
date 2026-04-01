@@ -49,6 +49,8 @@ def create_user():
     session = Session()
     data = request.get_json()
 
+    print("DATA RECIBIDA:", data)
+
     new_user = User(
         name=data.get("name"),
         status=data.get("status"),
@@ -57,6 +59,8 @@ def create_user():
 
     session.add(new_user)
     session.commit()
+    print("USUARIO CREADO ID:", new_user.id)
+
     session.close()
 
     return jsonify({"mensaje": "Usuario creado"}), 201
@@ -67,6 +71,8 @@ def get_users():
     session = Session()
 
     users = session.query(User).all()
+
+    print("USUARIOS EN BD:", users)
 
     result = []
     for u in users:
