@@ -10,13 +10,13 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     return "API funcionando viva cristo rey"
-
-
 DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
-session = Session()
 Base = declarative_base()
+
 
 
 
@@ -34,7 +34,9 @@ Base.metadata.create_all(engine)
 
 @app.route('/users', methods=['POST'])
 def create_user():
+    session = Session()
     data = request.get_json()
+
     new_user = User(
         name=data.get("name"),
         status=data.get("status"),
@@ -42,13 +44,17 @@ def create_user():
     )
     session.add(new_user)
     session.commit()
-    return jsonify({"mensaje": "Usuario creado con exito jupi"}), 201
+    session.close()
+    return jsonify({"mensaje": "Usuario creado"}), 201
+
+
 
 
 
 
 @app.route('/users', methods=['GET'])
 def get_users():
+    session = Session()
     users = session.query(User).all()
     result = []
     for u in users:
@@ -58,17 +64,28 @@ def get_users():
             "status": u.status,
             "telefono": u.telefono
         })
+    session.close()
     return jsonify(result)
+
+
+
 
 
 
 @app.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    user = session.query(User).get(user_id)
+    session = Session()
+    user = session.get(User, user_id)
     if not user:
-        return jsonify({"error": "No encontrado el usuario may"}), 404
+        session.close()
+        return jsonify({"error": "No encontrado"}), 404
     session.delete(user)
     session.commit()
-    return jsonify({"mensaje": "Usuario erradicado "}), 200
+    session.close()
+    return jsonify({"mensaje": "Eliminado"}), 200
+
+
+
+
 if __name__ == "__main__":
     app.run()
